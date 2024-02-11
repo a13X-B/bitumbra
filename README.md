@@ -41,7 +41,7 @@ local circle = bt.newOcclusionMesh()
 geo:addEdge(ax,ay, bx,by)
 circle:addCircle(x, y, r)
 geo:applyTransform(x, y, angle, sx, sy, ox, oy, kx, ky)
-geo:addMesh(circle)
+geo:addOcclusionMesh(circle)
 ```
 - `addEdge(ax,ay, bx,by)` - adds an edge(straight line segment from point A to point B) to occlusion mesh
   - `ax,ay bx,by` - x and y positions of both ends of an edge segment
@@ -51,7 +51,7 @@ geo:addMesh(circle)
   - `x, y` - center of the circle
   - `r` - circle radius
   - `seg` - number of segments that will form the circle(13 by default)
-- `addMesh(mesh)` - adds an existing occlusion mesh to the current mesh
+- `addOcclusionMesh(mesh)` - adds an existing occlusion mesh to the current mesh
   - `mesh` - an already existing occlusion mesh
   - useful when you want to combine a few meshes for the final effect
 - `applyTransform(x, y, angle, sx, sy, ox, oy, kx, ky)` - applies the standard love transformation to every edge of the mesh
