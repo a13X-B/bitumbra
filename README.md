@@ -5,6 +5,8 @@ many lights 2d shadows library for love framework
 
 requirements: opengl3 with array textures and instancing support(which technically should be a part of any gl3 capable system)
 
+NOTE: functionality is still being added but already existing API is very unlikely to change
+
 ## bitumbra API:
 ```lua
 local bt = require"bitumbra"
