@@ -206,7 +206,7 @@ local light_array_api = {
 			light_shader:send("lights_colors", self.col)
 			light_shader:send("shadowmap", sm.texture)
 			g.setShader(light_shader)
-			g.drawLayer(sm.texture,1,0,0)
+			g.rectangle("fill", 0,0, sm.texture:getDimensions())
 			g.pop()
 		end,
 	}
