@@ -57,6 +57,13 @@ void effect(){
 ]])
 
 local light_shader = g.newShader([[#pragma language glsl3
+#ifdef VERTEX
+vec4 position( mat4 transform_projection, vec4 vertex_position ){
+	vec4 pos = vertex_position;
+	pos.xy *= love_ScreenSize.xy;
+	return ProjectionMatrix * pos;
+}
+#endif
 #ifdef PIXEL
 uniform ArrayImage shadowmap;
 uniform vec2 lights_positions[128];
@@ -69,10 +76,9 @@ vec4 effect(vec4 col, Image tex, vec2 uv, vec2 sc){
 		shadow[i] = Texel(shadowmap, vec3(sc/love_ScreenSize.xy,float(i))).xy;
 	}
 	vec3 color = vec3(0.);
-	float cnt = 0.;
 	for (int i = 0; i<count; i++) {
 		if((int(shadow[i/32][(i/16)&1]*65535.) & (1<<(i%16))) != 0) continue;
-		vec2 lpos = lights_positions[i];
+		vec2 lpos = (TransformMatrix*vec4(lights_positions[i],0.,1.)).xy;
 		vec2 pos = sc;
 		int c = lights_colors[i];
 		ivec3 rgb = ivec3(c,c>>8,c>>16)&0xff;
@@ -180,6 +186,8 @@ local function newOcclusionMesh(max_edges)
 	return setmetatable({mesh = mesh, edge_count = 0}, occlusion_mesh_api)
 end
 
+local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, nil, "static")
+
 local light_array_api = {
 	__index = {
 		push = function(self, x, y, radius, r,g,b)
@@ -193,10 +201,19 @@ local light_array_api = {
 			self.rad:setPixel(id-1, 0, radius, 0, 0, 0)
 			self.col:setPixel(id-1, 0, r, g, b, 0)
 		end,
+		get = function(self, id)
+			local x,y = self.pos:getPixel(id-1, 0)
+			local rad = self.rad:getPixel(id-1, 0)
+			local r,g,b = self.col:getPixel(id-1, 0)
+			return x,y,rad,r,g,b
+		end,
 		pop = function(self)
-			self.count = self.count-1
-			local x, y = self.pos:getPixel(self.count,0)
-			return x, y
+			local id = self.count-1
+			self.count = id
+			local x,y = self.pos:getPixel(id, 0)
+			local rad = self.rad:getPixel(id, 0)
+			local r,g,b = self.col:getPixel(id, 0)
+			return x,y,rad,r,g,b
 		end,
 		draw = function(self, sm)
 			g.push("all")
@@ -206,7 +223,7 @@ local light_array_api = {
 			light_shader:send("lights_colors", self.col)
 			light_shader:send("shadowmap", sm.texture)
 			g.setShader(light_shader)
-			g.rectangle("fill", 0,0, sm.texture:getDimensions())
+			g.draw(fs_mesh)
 			g.pop()
 		end,
 	}
