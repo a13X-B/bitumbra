@@ -32,7 +32,8 @@ local n = lights.count
 - `set(i, x,y,radius, r,g,b)` - sets
   - `i` - index of the light to set
   - `x,y,radius, r,g,b` - see `push`
-- `pop()` - returns x and y of the popped light and decreases total lights count
+- `pop()` - returns `x`, `y`, `radius`, and `r`,`g`,`b` of the latest light and removes it from the list
+- `get(i)` - returns `x`, `y`, `radius`, and `r`,`g`,`b` of the light at index `i`
 - `count` - a number of currently set lights in the array
 - `draw(shadowmap)` - draws lights with respect of shadows stored in the shadowmap
 
