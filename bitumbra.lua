@@ -57,9 +57,12 @@ void effect(){
 ]])
 
 local light_shader = g.newShader([[#pragma language glsl3
+varying vec2 w_p;
 #ifdef VERTEX
+attribute vec2 world_pos;
 vec4 position( mat4 transform_projection, vec4 vertex_position ){
 	vec4 pos = vertex_position;
+	w_p = world_pos;
 	pos.xy *= love_ScreenSize.xy;
 	return ProjectionMatrix * pos;
 }
@@ -78,12 +81,9 @@ vec4 effect(vec4 col, Image tex, vec2 uv, vec2 sc){
 	vec3 color = vec3(0.);
 	for (int i = 0; i<count; i++) {
 		if((int(shadow[i/32][(i/16)&1]*65535.) & (1<<(i%16))) != 0) continue;
-		vec2 lpos = (TransformMatrix*vec4(lights_positions[i],0.,1.)).xy;
-		vec2 pos = sc;
-		int c = lights_colors[i];
-		ivec3 rgb = ivec3(c,c>>8,c>>16)&0xff;
+		ivec3 rgb = 0xff&(ivec3(lights_colors[i])>>ivec3(0,8,16));
 		vec3 col = vec3(rgb)/255.;
-		float att = sqrt(clamp(length(pos-lpos)/lights_radii[i],0.,1.));
+		float att = sqrt(clamp(length(w_p-lights_positions[i])/lights_radii[i],0.,1.));
 		col = mix(col,vec3(0.),att);
 		color+=col;
 	}
@@ -187,6 +187,8 @@ local function newOcclusionMesh(max_edges)
 end
 
 local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, nil, "static")
+local world_pos = g.newMesh({{"world_pos", "float", 2}},3,nil,"dynamic")
+fs_mesh:attachAttribute("world_pos", world_pos)
 
 local light_array_api = {
 	__index = {
@@ -223,6 +225,10 @@ local light_array_api = {
 			light_shader:send("lights_colors", self.col)
 			light_shader:send("shadowmap", sm.texture)
 			g.setShader(light_shader)
+			local w,h = g.getDimensions()
+			world_pos:setVertex(1, g.inverseTransformPoint(0,0))
+			world_pos:setVertex(2, g.inverseTransformPoint(2*w,0))
+			world_pos:setVertex(3, g.inverseTransformPoint(0,2*h))
 			g.draw(fs_mesh)
 			g.pop()
 		end,
