@@ -29,14 +29,13 @@ local shadowmap_shader = g.newShader([[#pragma language glsl3
 flat varying int light_id;
 uniform vec2 lights_positions[128];
 #ifdef VERTEX
-attribute vec4 light_pos;
 vec4 position( mat4 transform_projection, vec4 vertex_position ){
 	light_id = gl_InstanceID;
 	vec2 light_pos = lights_positions[gl_InstanceID];
 	if (gl_VertexID%2 != 0) {
 		vertex_position.xy += normalize(vertex_position.xy-light_pos)*99999999999.;
 	}
-		vertex_position.z = float(gl_InstanceID)/128.;
+	vertex_position.z = float(gl_InstanceID)/128.;
 	return transform_projection * vertex_position;
 }
 #endif
@@ -170,6 +169,9 @@ local occlusion_mesh_api = {
 		applyTransform = function(self, t_x, y, angle, sx, sy, ox, oy, kx, ky)
 			if type(t_x) == "number" then
 				t_x = tmp_transform:setTransformation(t_x, y, angle, sx, sy, ox, oy, kx, ky)
+			else
+				assert(t_x.type, "argument is not a number or Transform")
+				assert(t_x:type() == "Transform", "argument is not a number or Transform")
 			end
 			for i = 1, self.edge_count do
 				local ax,ay,bx,by = self:getEdge(i)
@@ -189,6 +191,11 @@ end
 local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, nil, "static")
 local world_pos = g.newMesh({{"world_pos", "float", 2}},3,nil,"dynamic")
 fs_mesh:attachAttribute("world_pos", world_pos)
+
+local light_transform = function(x,y, r,g,b,a)
+	r, g = tmp_transform:transformPoint(r,g)
+	return r, g, b, a
+end
 
 local light_array_api = {
 	__index = {
@@ -216,6 +223,16 @@ local light_array_api = {
 			local rad = self.rad:getPixel(id, 0)
 			local r,g,b = self.col:getPixel(id, 0)
 			return x,y,rad,r,g,b
+		end,
+		applyTransform = function(self, t_x, y, angle, sx, sy, ox, oy, kx, ky)
+			if type(t_x) == "number" then
+				tmp_transform:setTransformation(t_x, y, angle, sx, sy, ox, oy, kx, ky)
+			else
+				assert(t_x.type, "argument is not a number or Transform")
+				assert(t_x:type() == "Transform", "argument is not a number or Transform")
+				tmp_transform = t_x:clone()
+			end
+			self.pos:mapPixel(light_transform,0,0,self.count,1)
 		end,
 		draw = function(self, sm)
 			g.push("all")
