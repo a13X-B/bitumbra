@@ -34,6 +34,13 @@ local n = lights.count
   - `x,y,radius, r,g,b` - see `push`
 - `pop()` - returns `x`, `y`, `radius`, and `r`,`g`,`b` of the latest light and removes it from the list
 - `get(i)` - returns `x`, `y`, `radius`, and `r`,`g`,`b` of the light at index `i`
+- `applyTransform(x, y, angle, sx, sy, ox, oy, kx, ky)` - applies the standard love transformation to every light in the array
+  - `x,y` - translation
+  - `angle` - rotation angle in radians
+  - `sx, sy` - scale
+  - `ox, oy` - origin point, useful if you want to rotate a bunch of lights around an arbitrary point
+  - `kx, ky` - shear, I honestly have no idea who uses those but they're here for consistency with love API
+  - can also accept love's very own Transform object(love.math.newTransform()) instead
 - `count` - a number of currently set lights in the array
 - `draw(shadowmap)` - draws lights with respect of shadows stored in the shadowmap
 
@@ -62,8 +69,8 @@ geo:addOcclusionMesh(circle)
   - `angle` - rotation angle in radians
   - `sx, sy` - scale
   - `ox, oy` - origin point, useful if you want to rotate a mesh around an arbitrary point
-  - `kx, ky` - shear, I honestly have no idea who uses those but they're here for consistency with love API
-  - can also accept love's very own Transform object(love.math.newTransform()) instead
+  - `kx, ky` - shear
+  - can also accept love's Transform object instead
 - `edge_count` - current edge count of the mesh
 
 ## shadowmap API:
