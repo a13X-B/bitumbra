@@ -56,11 +56,9 @@ void effect(){
 ]])
 
 local light_shader = g.newShader([[#pragma language glsl3
-varying vec2 w_p;
 #ifdef VERTEX
 vec4 position( mat4 transform_projection, vec4 vertex_position ){
 	vec4 pos = vertex_position;
-	w_p = VertexTexCoord.xy;
 	pos.xy *= love_ScreenSize.xy;
 	return ProjectionMatrix * pos;
 }
@@ -81,7 +79,7 @@ vec4 effect(vec4 col, Image tex, vec2 uv, vec2 sc){
 		if((int(shadow[i/32][(i/16)&1]*65535.) & (1<<(i%16))) != 0) continue;
 		ivec3 rgb = 0xff&(ivec3(lights_colors[i])>>ivec3(0,8,16));
 		vec3 col = vec3(rgb)/255.;
-		float att = sqrt(clamp(length(w_p-lights_positions[i])/lights_radii[i],0.,1.));
+		float att = sqrt(clamp(length(uv-lights_positions[i])/lights_radii[i],0.,1.));
 		col = mix(col,vec3(0.),att);
 		color+=col;
 	}
