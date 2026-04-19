@@ -241,7 +241,7 @@ local light_array_api = {
 			light_shader:send("lights_colors", self.col)
 			light_shader:send("shadowmap", sm.texture)
 			g.setShader(light_shader)
-			local w,h = g.getDimensions()
+			local w,h = sm.texture:getDimensions()
 			world_pos:setVertex(1, g.inverseTransformPoint(0,0))
 			world_pos:setVertex(2, g.inverseTransformPoint(2*w,0))
 			world_pos:setVertex(3, g.inverseTransformPoint(0,2*h))
