@@ -113,7 +113,7 @@ local function newShadowMap(width, height)
 	local l = max_lights/32
 	local array = g.newCanvas(width, height, l, {type = "array", format = "rg16"})
 	local map = {
-		depthstencil = g.newCanvas(w, h, {format = "depth16", readable=false})
+		depthstencil = g.newCanvas(width, height, {format = "depth16", readable=false})
 	}
 	for i = 1, l do
 		map[i] = {array, layer=i}
