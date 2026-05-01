@@ -75,13 +75,13 @@ vec4 effect(vec4 col, Image tex, vec2 uv, vec2 sc){
 		shadow[i] = Texel(shadowmap, vec3(sc/love_ScreenSize.xy,float(i))).xy;
 	}
 	vec3 color = vec3(0.);
-	for (int i = 0; i<count; i++) {
-		if((int(shadow[i/32][(i/16)&1]*65535.) & (1<<(i%16))) != 0) continue;
-		ivec3 rgb = 0xff&(ivec3(lights_colors[i])>>ivec3(0,8,16));
-		vec3 col = vec3(rgb)/255.;
-		float att = sqrt(clamp(length(uv-lights_positions[i])/lights_radii[i],0.,1.));
-		col = mix(col,vec3(0.),att);
-		color+=col;
+	for (int i = 0; i<128; i++) {
+		if (i>=count) break;
+		if((int(shadow[i/32][(i/16)&1]*65535.) & (1<<(i%16))) == 0) {
+			ivec3 rgb = 0xff&(ivec3(lights_colors[i])>>ivec3(0,8,16));
+			vec3 col = vec3(rgb)/255.;
+			color+=col*max(1.-sqrt(length(uv-lights_positions[i])/lights_radii[i]), 0.);
+		}
 	}
 	return vec4(color, 1.);
 }
