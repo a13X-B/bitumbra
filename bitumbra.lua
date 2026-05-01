@@ -124,19 +124,24 @@ local tmp_transform = love.math.newTransform()
 local occlusion_mesh_api = {
 	__index = {
 		getEdge = function(self,i)
-				local n = (i-1)*6
+				local n = (i-1)*4
 				local ax, ay = self.mesh:getVertex(n+2)
 				local bx, by = self.mesh:getVertex(n+3)
 				return ax,ay,bx,by
 		end,
 		setEdge = function(self, id, ax,ay, bx,by)
-			local n = (id-1)*6
+			local n = (id-1)*4
 			self.mesh:setVertex(n+1, ax, ay)
 			self.mesh:setVertex(n+2, ax, ay)
 			self.mesh:setVertex(n+3, bx, by)
 			self.mesh:setVertex(n+4, bx, by)
-			self.mesh:setVertex(n+5, bx, by)
-			self.mesh:setVertex(n+6, ax, ay)
+			do
+				local i = (id-1)*3
+				self.map:setPixel(i+0,0,(n+0)/65535,(n+1)/65535,0,0)
+				self.map:setPixel(i+1,0,(n+2)/65535,(n+3)/65535,0,0)
+				self.map:setPixel(i+2,0,(n+2)/65535,(n+1)/65535,0,0)
+			end
+			self.mesh:setVertexMap(self.map, "uint16")
 		end,
 		addEdge = function(self, ax,ay, bx,by)
 			local n = self.edge_count+1
@@ -181,8 +186,9 @@ local occlusion_mesh_api = {
 }
 local occlusion_mesh_vf = {{name="VertexPosition", format="floatvec2", location=0}}
 local function newOcclusionMesh(max_edges)
-	local mesh = g.newMesh(occlusion_mesh_vf, (max_edges or 10000)*6, "triangles", "dynamic")
-	return setmetatable({mesh = mesh, edge_count = 0}, occlusion_mesh_api)
+	local mesh = g.newMesh(occlusion_mesh_vf, (max_edges or 10000)*4, "triangles", "dynamic")
+	local vertex_map = love.image.newImageData(10000,1,"rg16")
+	return setmetatable({mesh = mesh, map=vertex_map, edge_count = 0, }, occlusion_mesh_api)
 end
 
 local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, "fan", "static")
