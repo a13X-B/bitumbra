@@ -25,7 +25,7 @@ SOFTWARE.
 local g = love.graphics
 local max_lights = 32*4
 
-local shadowmap_shader = g.newShader([[#pragma language glsl3
+local shadowmap_shader = g.newShader([[
 flat varying int light_id;
 uniform vec2 lights_positions[128];
 #ifdef VERTEX
@@ -55,7 +55,7 @@ void effect(){
 #endif
 ]])
 
-local light_shader = g.newShader([[#pragma language glsl3
+local light_shader = g.newShader([[
 #ifdef VERTEX
 vec4 position( mat4 transform_projection, vec4 vertex_position ){
 	vec4 pos = vertex_position;
