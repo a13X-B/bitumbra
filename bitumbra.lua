@@ -179,14 +179,14 @@ local occlusion_mesh_api = {
 		end,
 	}
 }
-local occlusion_mesh_vf = { {"VertexPosition", "float", 2} }
+local occlusion_mesh_vf = {{name="VertexPosition", format="floatvec2", location=0}}
 local function newOcclusionMesh(max_edges)
 	local mesh = g.newMesh(occlusion_mesh_vf, (max_edges or 10000)*6, "triangles", "dynamic")
 	return setmetatable({mesh = mesh, edge_count = 0}, occlusion_mesh_api)
 end
 
 local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, "fan", "static")
-local world_pos = g.newMesh({{"VertexTexCoord", "float", 2}},3,"fan","dynamic")
+local world_pos = g.newMesh({{name="VertexTexCoord", format="floatvec2", location=1}},3,"fan","dynamic")
 fs_mesh:attachAttribute("VertexTexCoord", world_pos)
 
 local light_transform = function(x,y, r,g,b,a)
