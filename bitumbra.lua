@@ -56,13 +56,6 @@ void effect(){
 ]])
 
 local light_shader = g.newShader([[
-#ifdef VERTEX
-vec4 position( mat4 transform_projection, vec4 vertex_position ){
-	vec4 pos = vertex_position;
-	pos.xy *= love_ScreenSize.xy;
-	return ProjectionMatrix * pos;
-}
-#endif
 #ifdef PIXEL
 uniform ArrayImage shadowmap;
 uniform vec2 lights_positions[128];
@@ -191,7 +184,7 @@ local function newOcclusionMesh(max_edges)
 	return setmetatable({mesh = mesh, map=vertex_map, edge_count = 0, }, occlusion_mesh_api)
 end
 
-local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, "fan", "static")
+local fs_mesh = g.newMesh(occlusion_mesh_vf, {{0,0},{2,0},{0,2}}, "fan", "dynamic")
 local world_pos = g.newMesh({{name="VertexTexCoord", format="floatvec2", location=1}},3,"fan","dynamic")
 fs_mesh:attachAttribute("VertexTexCoord", world_pos)
 
@@ -246,6 +239,8 @@ local light_array_api = {
 			light_shader:send("shadowmap", sm.texture)
 			g.setShader(light_shader)
 			local w,h = sm.texture:getDimensions()
+			fs_mesh:setVertex(2, w*2, 0)
+			fs_mesh:setVertex(3, 0, h*2)
 			world_pos:setVertex(1, g.inverseTransformPoint(0,0))
 			world_pos:setVertex(2, g.inverseTransformPoint(2*w,0))
 			world_pos:setVertex(3, g.inverseTransformPoint(0,2*h))
