@@ -244,6 +244,7 @@ local light_array_api = {
 			world_pos:setVertex(1, g.inverseTransformPoint(0,0))
 			world_pos:setVertex(2, g.inverseTransformPoint(2*w,0))
 			world_pos:setVertex(3, g.inverseTransformPoint(0,2*h))
+			g.origin()
 			g.draw(fs_mesh)
 			g.pop()
 		end,
